@@ -1,0 +1,10 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "nft-marketplace",
+  "compatibility_date": "2026-09-01",
+  // SPA estática: sem Worker script, só assets. _headers e _redirects em dist/ são aplicados.
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application"
+  }
+}
