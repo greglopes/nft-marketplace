@@ -64,7 +64,16 @@ export function setSessionExpiredHandler(handler: () => void) {
 }
 
 http.interceptors.response.use(
-  (res) => res,
+  (res) => {
+    // The API only speaks JSON. HTML means the request escaped the mock layer and hit a
+    // static host's SPA fallback (index.html); surface a clear error instead of a schema one.
+    if (String(res.headers['content-type'] ?? '').includes('text/html')) {
+      return Promise.reject(
+        new ApiError({ status: res.status, code: 'TRANSIENT_FAILURE', message: 'Não foi possível carregar os dados simulados. Recarregue a página.' }),
+      )
+    }
+    return res
+  },
   (error: unknown) => {
     const apiError = ApiError.from(error)
     if (apiError.status === 401 && (apiError.code === 'SESSION_EXPIRED' || apiError.code === 'UNAUTHORIZED')) {

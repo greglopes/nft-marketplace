@@ -7,3 +7,4 @@ tests/e2e/__screenshots__/**/*-actual.png
 *.log
 .DS_Store
 lighthouse/reports/*
+.wrangler

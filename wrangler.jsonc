@@ -1,10 +1,14 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "nft-marketplace",
+  "main": "src/worker/index.ts",
   "compatibility_date": "2026-09-01",
-  // SPA estática: sem Worker script, só assets. _headers e _redirects em dist/ são aplicados.
+  // SPA estática com a API simulada pelo MSW no navegador. O Worker só roda para /api/*:
+  // se uma chamada escapar do service worker, responde erro JSON em vez do index.html.
+  // _headers em dist/ é aplicado; o fallback de rotas vem de not_found_handling (não use _redirects).
   "assets": {
     "directory": "./dist",
-    "not_found_handling": "single-page-application"
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
   }
 }
