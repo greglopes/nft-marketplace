@@ -1,0 +1,9 @@
+node_modules
+dist
+.env
+playwright-report
+test-results
+tests/e2e/__screenshots__/**/*-actual.png
+*.log
+.DS_Store
+lighthouse/reports/*

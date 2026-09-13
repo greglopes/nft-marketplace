@@ -1,0 +1,76 @@
+import { expect, test } from '@playwright/test'
+import { login, openApp } from '../support/app'
+
+const PNG_1x1 = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64')
+
+test.describe('Perfil e carteiras', () => {
+  test('edição de perfil, avatar e senha com erros de validação', async ({ page }) => {
+    await openApp(page)
+    await login(page, 'ana')
+    await page.goto('/account/profile')
+
+    await expect(page.getByLabel('Nome de exibição')).toHaveValue('Ana Nova')
+    await page.getByLabel('Nome de usuário').fill('bruno.mint')
+    await page.getByTestId('save-profile').click()
+    await expect(page.getByRole('alert').filter({ hasText: 'Nome de usuário indisponível' })).toBeVisible()
+
+    await page.getByLabel('Nome de usuário').fill('ana.nova.2')
+    await page.getByLabel('Nome de exibição').fill('Ana N.')
+    await page.getByTestId('save-profile').click()
+    await expect(page.getByText('Perfil atualizado.')).toBeVisible()
+    await page.reload()
+    await expect(page.getByLabel('Nome de exibição')).toHaveValue('Ana N.')
+    await expect(page.getByTestId('user-menu')).toContainText('Ana N.')
+
+    await page.getByTestId('avatar-input').setInputFiles({ name: 'avatar.png', mimeType: 'image/png', buffer: PNG_1x1 })
+    await expect(page.getByTestId('avatar-image')).toBeVisible()
+
+    await page.getByLabel('Senha atual').fill('errada123')
+    await page.getByLabel('Nova senha', { exact: true }).fill('NovaSenha@1')
+    await page.getByLabel('Confirmar nova senha').fill('NovaSenha@1')
+    await page.getByTestId('save-password').click()
+    await expect(page.getByRole('alert').filter({ hasText: 'Senha atual incorreta' })).toBeVisible()
+    await page.getByLabel('Senha atual').fill('Kurio@123')
+    await page.getByTestId('save-password').click()
+    await expect(page.getByText('Senha alterada.')).toBeVisible()
+  })
+
+  test('cadastro e edição de carteiras principal e secundária', async ({ page }) => {
+    await openApp(page)
+    await login(page, 'bruno')
+    await page.goto('/account/wallets')
+    await expect(page.getByText('Você ainda não cadastrou uma carteira principal.')).toBeVisible()
+    await page.getByRole('button', { name: 'Adicionar' }).first().click()
+    const form = page.getByTestId('wallet-form-primary')
+    await form.getByLabel('Nome de exibição').fill('Bruno Mint')
+    await form.getByLabel('Apelido da carteira').fill('Principal')
+    await form.getByLabel('Nome do perfil').fill('bruno.kurio')
+    await form.getByLabel('Endereço da carteira').fill('0x123')
+    await form.getByLabel('Código de indicação').fill('KURIO-BRUNO')
+    await form.getByLabel('E-mail').fill('bruno@kurio.app')
+    await form.getByLabel('Nome ENS').fill('bruno')
+    await page.getByTestId('save-wallet-primary').click()
+    await expect(form.getByRole('alert').filter({ hasText: 'Endereço 0x com 40 caracteres' })).toBeVisible()
+    await form.getByLabel('Endereço da carteira').fill('0x' + 'a1'.repeat(20))
+    await page.getByTestId('save-wallet-primary').click()
+    await expect(page.getByText('Carteira principal salva.')).toBeVisible()
+
+    await page.getByTestId('add-secondary').click()
+    const secondary = page.getByTestId('wallet-form-secondary')
+    await secondary.getByLabel('Nome de exibição').fill('Bruno Mint')
+    await secondary.getByLabel('Apelido da carteira').fill('Reserva')
+    await secondary.getByLabel('Nome do perfil').fill('bruno.reserva')
+    await secondary.getByLabel('Endereço da carteira').fill('0x' + 'a1'.repeat(20))
+    await secondary.getByLabel('Código de indicação').fill('KURIO-BRUNO')
+    await secondary.getByLabel('E-mail').fill('bruno@kurio.app')
+    await secondary.getByLabel('Nome ENS').fill('bruno-reserva')
+    await page.getByTestId('save-wallet-secondary').click()
+    await expect(secondary.getByRole('alert').filter({ hasText: 'Endereço já cadastrado' })).toBeVisible()
+    await secondary.getByLabel('Endereço da carteira').fill('0x' + 'b2'.repeat(20))
+    await page.getByTestId('save-wallet-secondary').click()
+    await expect(page.getByText('Carteira secundária salva.')).toBeVisible()
+
+    await page.reload()
+    await expect(page.getByTestId('wallet-form-secondary').getByLabel('Apelido da carteira')).toHaveValue('Reserva')
+  })
+})

@@ -1,0 +1,113 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  color-scheme: dark;
+  --background: #14100c;
+  --foreground: #f1e8da;
+  --card: #211a14;
+  --card-foreground: #f1e8da;
+  --popover: #241c15;
+  --popover-foreground: #f1e8da;
+  --primary: #d28e4b;
+  --primary-foreground: #1a120c;
+  --secondary: #2c221a;
+  --secondary-foreground: #f1e8da;
+  --muted: #2c221a;
+  --muted-foreground: #b39274;
+  --accent: #33271d;
+  --accent-foreground: #f1e8da;
+  --destructive: #e2574c;
+  --success: #6fbf73;
+  --border: #3b2e23;
+  --input: #3b2e23;
+  --ring: #d28e4b;
+  --radius: 0.25rem;
+  --warm: #c89f78;
+  --surface: #1b1510;
+  --surface-2: #2a2019;
+}
+
+@theme inline {
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-sans: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-warm: var(--warm);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 4px);
+  --radius-xl: calc(var(--radius) + 12px);
+  --animate-shimmer: shimmer 1.6s linear infinite;
+  @keyframes shimmer {
+    from { background-position: 200% 0; }
+    to { background-position: -200% 0; }
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/60;
+  }
+  html {
+    @apply bg-background text-foreground font-mono antialiased;
+    scrollbar-gutter: stable;
+  }
+  body {
+    @apply min-h-dvh bg-background text-foreground;
+    overflow-x: hidden;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-ring;
+  }
+  ::selection {
+    @apply bg-primary text-primary-foreground;
+  }
+}
+
+@layer components {
+  .skeleton-shimmer {
+    background: linear-gradient(
+      100deg,
+      var(--surface-2) 30%,
+      #3a2d23 50%,
+      var(--surface-2) 70%
+    );
+    background-size: 200% 100%;
+    animation: var(--animate-shimmer);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .skeleton-shimmer {
+      animation: none;
+      background: var(--surface-2);
+    }
+    * {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+  .link-underline {
+    @apply relative after:absolute after:-bottom-1 after:left-0 after:h-px after:w-full after:bg-primary;
+  }
+}
